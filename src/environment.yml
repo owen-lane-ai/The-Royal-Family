@@ -1,0 +1,10 @@
+#This is an example environment file, ours will most likely have different libraries and we will export one at a later time
+name: The-Royal-Family
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - keras
