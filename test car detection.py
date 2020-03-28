@@ -14,7 +14,7 @@ model.load_weights("model.h5")
 print("Loaded model from disk")
 
 responce = int(input("Single Image: 1\nList of Images: 2\n"))
-
+print()
 input_dim = 228
 
 if responce == 1: #Single image
@@ -43,11 +43,16 @@ if responce == 1: #Single image
     source_img.save( 'yolov3\image_results.png' , 'png' )
     print("Image saved")
     
-    #This part doesn't really work. you can try to fiddle with it if you want.
+    
+    
+    
+    
+    
 else:
     images = []
+    boxes = []
     
-    image_paths = glob.glob(r"YOUR LINK HERE\*.jpg")
+    image_paths = glob.glob(r"C:\Users\Local User\Pictures\cars_train\test images\*.jpg")
     
     loader = tqdm(total=len(image_paths), position=0, leave=True, desc="Loading images...")
     for path in image_paths:
@@ -61,16 +66,18 @@ else:
     loader.close()
     
     #Progress bar for predicting images and saving them to system
-    loop = tqdm(total = boxes.shape[0], position=0, leave=True, desc="Predicting test images...")
     
     images = np.array(images)
-    images = images.squeeze(axis=1).shape
-    boxes = model.predict(images)
+    print(images.shape)
+    image = images.squeeze(axis=1)
+    
+    loop = tqdm(total = len(image_paths), position=0, leave=True, desc="Predicting test images...")
     
     #For each bounding box
     for i in range(len(image_paths)):
+        boxes = model.predict(images[i])
         #Grab the box locations and size them up to be the correct size.
-        b = boxes[ i , 0 , 0 , 0 : 4 ] * input_dim
+        b = boxes[ 0  , 0 , 0 , 0 : 4 ] * input_dim
         img = images[i] * input_dim
         
         img = img.squeeze(axis=0)
@@ -80,9 +87,11 @@ else:
         draw = ImageDraw.Draw( source_img )
         draw.rectangle( b , outline="blue" )
         #Save the image and add 1 to the image file name.
-        source_img.save( 'WHEREEVER YOU WANT YOUR IMAGES TO GO\image_{}.png'.format( i + 1 ) , 'png' )
+        source_img.save( 'yolov3\image_{}.png'.format( i + 1 ) , 'png' )
         loop.update(1)
     
     loop.close()
     print("\nFinished")
     print("Complete")
+    
+  
