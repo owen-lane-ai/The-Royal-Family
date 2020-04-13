@@ -16,7 +16,7 @@ model = model_from_json(loaded_model_json)
 model.load_weights("model.h5")
 print("Loaded model from disk")
 
-responce = int(input("Single Image: 1\nList of Images: 2\nVideo: 3"))
+responce = int(input("Single Image: 1\nList of Images: 2\nVideo: 3\b"))
 print()
 input_dim = 228
 
@@ -77,7 +77,7 @@ elif responce == 2:
     #For each bounding box
     for i in range(len(image_paths)):
         #Grab the box locations and size them up to be the correct size.
-        b = boxes[ i  , 0 , 0 , 0 : 4 ] * input_dim
+        b = boxes[ i  , 0 , 0 , : ] * input_dim
         img = images[i] * input_dim
         
         #Rebuild the image.
@@ -147,7 +147,7 @@ else:
     #For each bounding box
     for i in range(len(images)):
         #Grab the box locations and size them up to be the correct size.
-        b = boxes[ i  , 0 , 0 , 0 : 4 ] * input_dim
+        b = boxes[ i  , : ] * input_dim
         img = images[i] * input_dim
         
         #Rebuild the image.
