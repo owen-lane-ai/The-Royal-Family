@@ -16,9 +16,8 @@ model = model_from_json(loaded_model_json)
 model.load_weights("model.h5")
 print("Loaded model from disk")
 
-#responce = int(input("Single Image: 1\nList of Images: 2\n"))
+responce = int(input("Single Image: 1\nList of Images: 2\nVideo: 3"))
 print()
-responce = 3
 input_dim = 228
 
 if responce == 1: #Single image
@@ -93,6 +92,10 @@ elif responce == 2:
     loop.close()
     print("\nFinished")
     print("Complete")
+    
+    
+    
+    
     
 else:
     #Create containers
