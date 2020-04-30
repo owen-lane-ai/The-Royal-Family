@@ -37,39 +37,33 @@ input_dim = 228
 model_layers = [       
     keras.layers.Conv2D( 256 , input_shape=( input_dim , input_dim , 3 ) , kernel_size=( 3 , 3 ) , strides=2 , activation='relu' ),
     keras.layers.Conv2D( 256 , kernel_size=( 3 , 3 ) , strides=2 , activation='relu' ),
+    keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
-
-    keras.layers.Conv2D( 256 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Conv2D( 256 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
+    
+    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
+    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
+    keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
-
+    
     keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
     keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.BatchNormalization(),
-
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.BatchNormalization(),
-
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
+    keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
 
     keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
     keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
+    keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
-
+    
     keras.layers.Conv2D( 64 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
     keras.layers.Conv2D( 64 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.BatchNormalization(),
-
-    keras.layers.Conv2D( 64 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Conv2D( 64 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
+    keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
     keras.layers.Flatten(),
 
-    keras.layers.Dense( 32 ,activation='sigmoid' ),
+    keras.layers.Dense( 64 ,activation='sigmoid' ),
     keras.layers.Dense( 32 , activation='sigmoid' ),
+    keras.layers.Dropout(0.5),
     keras.layers.Dense( 4 ,  activation='sigmoid' ),
 ]
 
@@ -149,7 +143,7 @@ model.fit(
     #checking against test data
     validation_data=( x_test , y_test ),
     #How many steps through
-    epochs= 7,
+    epochs= 40,
     #How many images to be checked at any one time. Affecting this will affect both train times aswell as over fitting
     batch_size=3
 )
