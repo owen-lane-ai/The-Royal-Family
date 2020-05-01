@@ -8,8 +8,14 @@ import sys
 import psutil
 import keras
 from keras.layers import *
+from keras.preprocessing.image import ImageDataGenerator
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
+import time
+
+def day_time():
+    dateString = f"Date: {time.gmtime()[2]}/{time.gmtime()[1]}/{time.gmtime()[0]}\nTime: {time.gmtime()[3]}:{time.gmtime()[4]}"
+    return dateString
 
 def calculate_iou( target_boxes , pred_boxes ):
     xA = tf.maximum( target_boxes[ ... , 0], pred_boxes[ ... , 0] )
@@ -44,26 +50,14 @@ model_layers = [
     keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
     keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
-    
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Dropout(0.5),
-    keras.layers.BatchNormalization(),
-
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Dropout(0.5),
-    keras.layers.BatchNormalization(),
-    
-    keras.layers.Conv2D( 64 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Conv2D( 64 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
-    keras.layers.Dropout(0.5),
-    keras.layers.BatchNormalization(),
     keras.layers.Flatten(),
 
-    keras.layers.Dense( 64 ,activation='sigmoid' ),
-    keras.layers.Dense( 32 , activation='sigmoid' ),
+    keras.layers.Dense( 128 , activation='sigmoid' ),
+    keras.layers.Dense( 128 , activation='sigmoid' ),
+    keras.layers.Dense( 128 , activation='sigmoid' ),
     keras.layers.Dropout(0.5),
+    keras.layers.Dense( 64 , activation='sigmoid' ),
+    keras.layers.Dense( 32 , activation='sigmoid' ),
     keras.layers.Dense( 4 ,  activation='sigmoid' ),
 ]
 
@@ -135,15 +129,16 @@ input_shape = ( input_dim , input_dim , 3 )
 
 print("Applying keras")
 
+epoc = 40
 
-model.fit( 
+history = model.fit( 
     #The train data
     x_train ,
     y_train , 
     #checking against test data
     validation_data=( x_test , y_test ),
     #How many steps through
-    epochs= 40,
+    epochs= epoc,
     #How many images to be checked at any one time. Affecting this will affect both train times aswell as over fitting
     batch_size=3
 )
@@ -154,6 +149,15 @@ with open("car_detection.json", "w") as json_file:
     json_file.write(model_json)
 model.save( 'model.h5')
 print("Model saved")
+
+print("Writing model to file...")
+
+with open("Car Detection Model review.txt", "a") as file:
+    file.write("---------------------------------------------------------------\n\n")
+    model.summary(print_fn=lambda x: file.write(x + '\n'))
+    file.write(f"Running on {epoc} epochs it achieved an accuracy of {round(history.history['iou_metric'][-1] * 100, 1)}%\n")
+    dateString = day_time()
+    file.write(f"{dateString}")
 
 #Predict boxes on test set.
 boxes = model.predict( x_test )
