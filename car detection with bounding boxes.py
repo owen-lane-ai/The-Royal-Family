@@ -63,12 +63,13 @@ model_layers = [
 
 model = keras.Sequential( model_layers )
 
+#compile the model
 model.compile(
 	optimizer=keras.optimizers.Adam(),
 	loss=custom_loss,
     metrics=[iou_metric]
 )
-
+#look at the summary of the model
 model.summary()
 
 #Create an array for the images aswell as a list of pathways to them
@@ -129,6 +130,7 @@ input_shape = ( input_dim , input_dim , 3 )
 
 print("Applying keras")
 
+#40 loops through the model
 epoc = 40
 
 history = model.fit( 
