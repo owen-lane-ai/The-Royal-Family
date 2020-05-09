@@ -1,4 +1,4 @@
-from PIL import Image , ImageDraw
+from PIL import Image , ImageDraw, ImageOps
 import xmltodict
 from tqdm import tqdm
 import os
@@ -13,9 +13,13 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 import time
 
+#-----------------------------------------------------------------------------
+
 def day_time():
     dateString = f"Date: {time.gmtime()[2]}/{time.gmtime()[1]}/{time.gmtime()[0]}\nTime: {time.gmtime()[3]}:{time.gmtime()[4]}"
     return dateString
+
+#-----------------------------------------------------------------------------
 
 def calculate_iou( target_boxes , pred_boxes ):
     xA = tf.maximum( target_boxes[ ... , 0], pred_boxes[ ... , 0] )
@@ -28,13 +32,19 @@ def calculate_iou( target_boxes , pred_boxes ):
     iou = interArea / ( boxAArea + boxBArea - interArea )
     return iou
 
+#-----------------------------------------------------------------------------
+
 def custom_loss( y_true , y_pred ):
     mse = tf.losses.mean_squared_error( y_true , y_pred ) 
     iou = calculate_iou( y_true , y_pred ) 
     return mse +  (1-iou)
 
+#-----------------------------------------------------------------------------
+
 def iou_metric( y_true , y_pred ):
     return calculate_iou( y_true , y_pred ) 
+
+#-----------------------------------------------------------------------------
 
 #The size the image aswell as bounding boxes to be transformed to.
 input_dim = 228
@@ -46,7 +56,7 @@ model_layers = [
     keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
     
-    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
+    keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=2 , activation='relu' ),
     keras.layers.Conv2D( 128 , kernel_size=( 3 , 3 ) , strides=1 , activation='relu' ),
     keras.layers.Dropout(0.5),
     keras.layers.BatchNormalization(),
@@ -63,13 +73,12 @@ model_layers = [
 
 model = keras.Sequential( model_layers )
 
-#compile the model
 model.compile(
 	optimizer=keras.optimizers.Adam(),
 	loss=custom_loss,
     metrics=[iou_metric]
 )
-#look at the summary of the model
+
 model.summary()
 
 #Create an array for the images aswell as a list of pathways to them
@@ -84,13 +93,13 @@ annotations_paths = glob.glob(r'C:\Users\Local User\Pictures\cars_train\cars_tra
 loop = tqdm(total = len(annotations_paths), position=0, leave=True)
 loop.set_description("Loading images and annotations")
 
-
-count = 1;
-# Apply manipulations to both and store them in their arrays
 for IMGorXML in zip(image_paths, annotations_paths):
+    
+    #IMAGES---------------------------------------------------------------
+    
     image = Image.open( IMGorXML[0] )
     #If virtual memory is above 80% used stop the program to avoid a crash.
-    if psutil.virtual_memory()[2] > 87:
+    if psutil.virtual_memory()[2] > 85:
         print("\n\nMemory usage too high")
         sys.exit()
         
@@ -101,42 +110,69 @@ for IMGorXML in zip(image_paths, annotations_paths):
     image = image.resize( ( input_dim , input_dim ))
     #Make all pixel colours between 0 and 1 for processing
     image = np.asarray( image ) / 255.0
-    count+=1
     images.append( image )
     
     
+    
+    image = Image.open( IMGorXML[0] )
+    image = ImageOps.mirror(image)
+    #If virtual memory is above 80% used stop the program to avoid a crash.
+    if psutil.virtual_memory()[2] > 85:
+        print("\n\nMemory usage too high")
+        sys.exit()
+    #Grab thewidth and height of the image for bounding box manipulation
+    width, height = image.size
+    widthinput, heightinput = input_dim / width, input_dim / height
+    #Resize the image
+    image = image.resize( ( input_dim , input_dim ))
+    #Make all pixel colours between 0 and 1 for processing
+    image = np.asarray( image ) / 255.0
+    images.append( image )
+    
+    
+    #ANNOTATIONS----------------------------------------------------------
+    
     xml = xmltodict.parse(open(IMGorXML[1], 'rb'))
     bndbox = xml['annotation']['object']['bndbox']
-    
     #Grab all xml bounding boxes and shrink them appropriatly to fit the image where they originally where
     bndbox = np.array([ int(bndbox[ 'xmin' ]) * widthinput , int(bndbox[ 'ymin' ]) * heightinput , int(bndbox[ 'xmax' ]) * widthinput , int(bndbox[ 'ymax' ]) * heightinput ])
     #Shrink to be between 0 and 1 for processing
+    altBox = bndbox
     bndbox = bndbox / input_dim
     bboxes.append(bndbox)
+    
+    
+    
+    #Flip dimentions of bounding box
+    altBox = altBox - input_dim
+    altBox = altBox - altBox * 2
+    altBox = altBox / input_dim
+    altBox = [altBox[2],altBox[3], altBox[0], altBox[1]]
+    bboxes.append(altBox)
+    
     loop.update(1)
 
 loop.close()
 
 #Create numpy arrays of each
-Y = np.array(bboxes)
-X = np.array(images)
+bboxes = np.array(bboxes)
+images = np.array(images)
 
 #Present the number of images aswell as bounding boxes.
-print(f"Number of images: {len(X)}")
-print(f"Number of bounding boxes: {len(Y)}")
+print(f"Number of images: {len(images)}")
+print(f"Number of bounding boxes: {len(bboxes)}")
 
-x_train, x_test, y_train, y_test = train_test_split( X, Y, test_size=0.2 )
+images, x_test, bboxes, y_test = train_test_split( images, bboxes, test_size=0.2 )
 input_shape = ( input_dim , input_dim , 3 )
 
 print("Applying keras")
 
-#40 loops through the model
 epoc = 40
 
 history = model.fit( 
     #The train data
-    x_train ,
-    y_train , 
+    images ,
+    bboxes , 
     #checking against test data
     validation_data=( x_test , y_test ),
     #How many steps through
@@ -155,11 +191,13 @@ print("Model saved")
 print("Writing model to file...")
 
 with open("Car Detection Model review.txt", "a") as file:
-    file.write("---------------------------------------------------------------\n\n")
+    file.write("------------------------------------------------------------------------------------------------------------\n")
     model.summary(print_fn=lambda x: file.write(x + '\n'))
     file.write(f"Running on {epoc} epochs it achieved an accuracy of {round(history.history['iou_metric'][-1] * 100, 1)}%\n")
-    dateString = day_time()
-    file.write(f"{dateString}")
+    length = len(images)
+    file.write(f"using {length} images\n")
+    file.write("Notes: The sudden increase of last model was by adding whole new data. instead of just flipping the data. I assume this is because flipping the data doesn't change much as the data is basically the same, explaining the lack ofincrease in accuracy.\n")
+    file.write(f"{day_time()}\n")
 
 #Predict boxes on test set.
 boxes = model.predict( x_test )
