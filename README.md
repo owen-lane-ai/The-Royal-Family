@@ -48,4 +48,6 @@ If you are having issues, please check the environment has been set up and all d
 Data
 -------
 
-For the data set please go to this link: <https://drive.google.com/open?id=1LIZHortrMvIkhrnS6MbXisHMum5OFh_B>
+For the data set please go to this link: <https://drive.google.com/open?id=18VxKi1Y1H2gFBkG7Qu84o0F9d56iWJql>
+
+For the pretrained model go to this link: <https://drive.google.com/open?id=1AqQSAsd7Vbdh1YZsKEEgVH-RKcB4zpgU>
