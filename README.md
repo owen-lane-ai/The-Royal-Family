@@ -44,6 +44,8 @@ Execution
 ---------
 > Training
 
+Using the anaconda command prompt
+
 Should you wish to create your own model using either train or train aug. First open the command console. Next navigate to the folder that the .py files are stored.
 
 If you wish to create a new model from scratch, run either train.py or trainAug.py by doing...
