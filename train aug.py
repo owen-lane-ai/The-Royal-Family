@@ -46,6 +46,8 @@ def iou_metric( y_true , y_pred ):
 
 #-----------------------------------------------------------------------------
 
+####################################START#####################################
+
 #The size the image aswell as bounding boxes to be transformed to.
 input_dim = 228
 
@@ -83,14 +85,14 @@ model.summary()
 
 #Create an array for the images aswell as a list of pathways to them
 images = []
-image_paths = glob.glob( r'C:\Users\Local User\Pictures\cars_train\cars_train\*.jpg')
+image_paths = glob.glob( r'training\*.jpg')
 
 #Create a array of bounding boxes aswell as the pathway to them
 bboxes = []
-annotations_paths = glob.glob(r'C:\Users\Local User\Pictures\cars_train\cars_train\anno\*.xml')
+annotations_paths = glob.glob(r'training\anno\*.xml')
 
 #Progress bar for grabbing images and annotations
-loop = tqdm(total = len(annotations_paths), position=0, leave=True)
+loop = tqdm(total = len(image_paths), position=0, leave=True)
 loop.set_description("Loading images and annotations")
 
 for IMGorXML in zip(image_paths, annotations_paths):
@@ -183,9 +185,9 @@ history = model.fit(
 #Save the model
 print("Saving model")
 model_json = model.to_json()
-with open("car_detection.json", "w") as json_file:
+with open("model\car_detection.json", "w") as json_file:
     json_file.write(model_json)
-model.save( 'model.h5')
+model.save( 'model\model.h5')
 print("Model saved")
 
 print("Writing model to file...")
@@ -194,9 +196,10 @@ with open("Car Detection Model review.txt", "a") as file:
     file.write("------------------------------------------------------------------------------------------------------------\n")
     model.summary(print_fn=lambda x: file.write(x + '\n'))
     file.write(f"Running on {epoc} epochs it achieved an accuracy of {round(history.history['iou_metric'][-1] * 100, 1)}%\n")
+    file.write("This model is using data augmentation\n")
     length = len(images)
     file.write(f"using {length} images\n")
-    file.write("Notes: The sudden increase of last model was by adding whole new data. instead of just flipping the data. I assume this is because flipping the data doesn't change much as the data is basically the same, explaining the lack ofincrease in accuracy.\n")
+    file.write("Notes: .\n")
     file.write(f"{day_time()}\n")
 
 #Predict boxes on test set.
@@ -217,7 +220,7 @@ for i in range( boxes.shape[0] ):
     draw = ImageDraw.Draw( source_img )
     draw.rectangle( b , outline="blue" )
     #Save the image and add 1 to the image file name.
-    source_img.save( 'yolov3\image_{}.png'.format( i + 1 ) , 'png' )
+    source_img.save( 'result\image_{}.png'.format( i + 1 ) , 'png' )
     loop.update(1)
 
 loop.close()
