@@ -43,7 +43,7 @@ The new environment should appear in this list.
 Execution
 ---------
 
-Should you wish to create your own model using either car train or car train aug. First open the command console. Next navigate to the folder that the .py files are stored.
+Should you wish to create your own model using either train or train aug. First open the command console. Next navigate to the folder that the .py files are stored.
 
 Support
 -------
