@@ -6,7 +6,6 @@ import sys
 import cv2
 import psutil
 from keras.models import model_from_json
-import argparse
 
 print("Getting model")
 json_file = open('model\car_detection.json', 'r')
