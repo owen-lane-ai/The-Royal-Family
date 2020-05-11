@@ -42,8 +42,44 @@ The new environment should appear in this list.
 
 Execution
 ---------
+> Training
 
 Should you wish to create your own model using either train or train aug. First open the command console. Next navigate to the folder that the .py files are stored.
+
+If you wish to create a new model from scratch, run either train.py or trainAug.py by doing...
+
+    python train.py
+
+    python trainAug.py
+
+Make sure before you do this that you have the images you wish to test on inside the folder called "training" with their annotations in a folder called "anno"
+
+To create the annotations for these images please use this tool <https://pypi.org/project/labelImg/>
+
+Once this is all done and each image is ordered correctly. (The easiest way to do this is to call each image a number (Image_[numbers]))
+
+> Testing
+
+To test the program, please run the following.
+
+    python test.py
+
+The program will give you 3 options.
+A single image
+A file of images
+A video.
+
+A single image.
+
+Please make sure the image is in the testing folder with the name test.jpg. the program will get the image and output its results to the result folder.
+
+A file of images
+
+This option will use the entirity of the testing file. and output the result to the result folder.
+
+A video
+
+this option will require a video named "test.mp4" in the testing folder. Again the result will be sent to the results folder
 
 Support
 -------
